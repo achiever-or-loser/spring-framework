@@ -1,3 +1,11 @@
+buildscript {
+	repositories {
+		maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+		maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
+		maven { url "https://repo.spring.io/plugins-release" }
+	}
+}
+
 plugins {
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE' apply false
 	id 'io.spring.nohttp' version '0.0.10'
@@ -133,7 +141,7 @@ configure(allprojects) { project ->
 				entry('undertow-servlet-jakartaee9') {
 					exclude group: "org.jboss.spec.javax.annotation", name: "jboss-annotations-api_1.3_spec"
 				}
-				entry 'undertow-websockets-jsr-jakartaee9'
+				entry 'undertow-websockets-jsr'
 			}
 
 			dependencySet(group: 'com.squareup.okhttp3', version: '3.14.9') {
@@ -253,6 +261,10 @@ configure(allprojects) { project ->
 			cacheChangingModulesFor 0, "seconds"
 		}
 		repositories {
+			//加上阿里云镜像
+			maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+			maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
+			maven { url "https://repo.spring.io/plugins-release" }
 			mavenCentral()
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
 		}
