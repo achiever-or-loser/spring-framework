@@ -71,12 +71,15 @@ import org.springframework.util.StringUtils;
 public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements SingletonBeanRegistry {
 
 	/** Cache of singleton objects: bean name to bean instance. */
+	//第一级缓存，存放可用的完全初始化，成品的Bean
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
 	/** Cache of singleton factories: bean name to ObjectFactory. */
+	//第三级缓存，存的是Bean工厂对象，用来生成半成品的Bean并放入到二级缓存中。用以解决循环依赖。如果Bean存在AOP的话，返回的是AOP的代理对象
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
 	/** Cache of early singleton objects: bean name to bean instance. */
+	//第二级缓存，存放半成品的Bean，半成品的Bean是已创建对象，但是未注入属性和初始化。用以解决循环依赖。
 	private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
 	/** Set of registered singletons, containing the bean names in registration order. */
@@ -174,15 +177,23 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+		// 查询缓存中是否有创建好的单例
 		Object singletonObject = this.singletonObjects.get(beanName);
+		// 如果缓存不存在，判断是否正在创建中
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			synchronized (this.singletonObjects) {
+				// 从earlySingletonObjects中查询是否有early缓存
 				singletonObject = this.earlySingletonObjects.get(beanName);
+				// early缓存也不存在，且允许early引用
 				if (singletonObject == null && allowEarlyReference) {
+					// 从单例工厂Map里查询beanName
 					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 					if (singletonFactory != null) {
+						// singletonFactory存在，则调用getObject方法拿到单例对象
 						singletonObject = singletonFactory.getObject();
+						// 将单例对象添加到early缓存中
 						this.earlySingletonObjects.put(beanName, singletonObject);
+						// 移除单例工厂中对应的singletonFactory
 						this.singletonFactories.remove(beanName);
 					}
 				}
